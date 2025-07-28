@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { atmService } from '../services/atmService';
 import { CardInfoResponse, TransactionResponse, ValidationResult } from '../types/api';
+import NumericKeypad from '../components/NumericKeypad';
 import './Withdraw.css';
 
 const Withdraw: React.FC = () => {
@@ -53,15 +54,12 @@ const Withdraw: React.FC = () => {
     return { isValid: true };
   }, []);
 
-  const handleAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const value: string = e.target.value.replace(/\D/g, ''); // Solo números
-    setAmount(value);
+  const handleNumberClick = useCallback((number: number): void => {
+    setAmount(prev => prev + number);
     setError('');
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    
+  const handleSubmit = useCallback(async (): Promise<void> => {
     if (!cardInfo) {
       setError('Información de tarjeta no disponible');
       return;
@@ -121,34 +119,28 @@ const Withdraw: React.FC = () => {
       <p>Tarjeta: {cardInfo.maskedCardNumber}</p>
       <p>Saldo disponible: {formatCurrency(cardInfo.balance)}</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label htmlFor="amountInput">Monto a Retirar</label>
-          <input
-            id="amountInput"
-            type="text"
-            value={amount}
-            onChange={handleAmountChange}
-            placeholder="Ingrese el monto"
-            disabled={isLoading}
-          />
-          <small>Ingrese el monto que desea retirar</small>
-        </div>
+      <div className="input-group">
+        <label>Monto a Retirar</label>
+        <input
+          type="text"
+          value={amount}
+          readOnly
+          placeholder="Ingrese el monto"
+          className="amount-display"
+        />
+        <small>Ingrese el monto que desea retirar</small>
+      </div>
 
-        {error && <div className="error">{error}</div>}
+      {error && <div className="error">{error}</div>}
 
-        <div className="buttons">
-          <button type="button" onClick={handleClear} disabled={isLoading}>
-            Limpiar
-          </button>
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Procesando...' : 'Retirar'}
-          </button>
-          <button type="button" onClick={handleExit} disabled={isLoading}>
-            Salir
-          </button>
-        </div>
-      </form>
+      <NumericKeypad
+        onNumberClick={handleNumberClick}
+        onClear={handleClear}
+        onAccept={handleSubmit}
+        onExit={handleExit}
+        showExitButton={true}
+        acceptButtonText={isLoading ? 'Procesando...' : 'Aceptar'}
+      />
     </div>
   );
 };

@@ -1,0 +1,81 @@
+.numeric-keypad {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.numeric-keypad .keypad-button {
+  background-color: #ffffff !important;
+  color: #333 !important;
+  border: 1px solid #ccc !important;
+  font-weight: bold !important;
+  padding: 15px !important;
+  font-size: 18px !important;
+}
+
+.numeric-keypad .keypad-button:first-child,
+.numeric-keypad .keypad-button:nth-child(2),
+.numeric-keypad .keypad-button:nth-child(3) {
+  background-color: #ffffff !important;
+  color: #333 !important;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.keypad-button {
+  padding: 15px;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff !important;
+  color: #333 !important;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+.keypad-button:hover {
+  background-color: #e9ecef !important;
+}
+
+.keypad-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.action-button.clear {
+  background-color: #6c757d;
+  color: white;
+  font-weight: bold;
+}
+
+.action-button.accept {
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+}
+
+.action-button.exit {
+  background-color: #dc3545;
+  color: white;
+  font-weight: bold;
+}
+
+.action-button:hover {
+  opacity: 0.8;
+} 

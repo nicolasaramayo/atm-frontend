@@ -40,7 +40,7 @@ El proyecto sigue una arquitectura de capas limpia (Clean Architecture) con los 
 ### Datos de Prueba
 
 
-| Número de Tarjeta    | PIN  | Balance  | Estado    |
+| Número de Tarjeta   | PIN  | Balance  | Estado    |
 |---------------------|------|----------|-----------|
 | 4532015112830366    | 1234 | $1,000.00| Activa    |
 | 5555555555554444    | 5678 | $2,500.50| Activa    |

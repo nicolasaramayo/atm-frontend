@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { atmService } from '../services/atmService';
 import { CardInfoResponse, ValidationResult } from '../types/api';
+import NumericKeypad from '../components/NumericKeypad';
 import './PinEntry.css';
 
 const PinEntry: React.FC = () => {
@@ -39,17 +40,14 @@ const PinEntry: React.FC = () => {
     return { isValid: true };
   }, []);
 
-  const handlePinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const value: string = e.target.value.replace(/\D/g, ''); // Solo números
-    if (value.length <= 4) {
-      setPin(value);
+  const handleNumberClick = useCallback((number: number): void => {
+    if (pin.length < 4) {
+      setPin(prev => prev + number);
       setError('');
     }
-  }, []);
+  }, [pin]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    
+  const handleSubmit = useCallback(async (): Promise<void> => {
     const validation: ValidationResult = validatePin(pin);
     if (!validation.isValid) {
       setError(validation.message || 'Error de validación');
@@ -113,41 +111,34 @@ const PinEntry: React.FC = () => {
       <h1>Ingrese su PIN</h1>
       <p>Tarjeta: {cardInfo.maskedCardNumber}</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label htmlFor="pinInput">PIN</label>
-          <input
-            id="pinInput"
-            type="password"
-            value={pin}
-            onChange={handlePinChange}
-            placeholder="****"
-            maxLength={4}
-            disabled={isLoading}
-          />
-          <small>Ingrese su PIN de 4 dígitos</small>
+      <div className="input-group">
+        <label>PIN</label>
+        <input
+          type="password"
+          value={pin}
+          readOnly
+          placeholder="****"
+          className="pin-display"
+        />
+        <small>Ingrese su PIN de 4 dígitos</small>
+      </div>
+
+      {error && <div className="error">{error}</div>}
+
+      {attempts > 0 && (
+        <div className="attempts">
+          Intentos restantes: {MAX_ATTEMPTS - attempts}
         </div>
+      )}
 
-        {error && <div className="error">{error}</div>}
-
-        {attempts > 0 && (
-          <div className="attempts">
-            Intentos restantes: {MAX_ATTEMPTS - attempts}
-          </div>
-        )}
-
-        <div className="buttons">
-          <button type="button" onClick={handleClear} disabled={isLoading}>
-            Limpiar
-          </button>
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Validando...' : 'Aceptar'}
-          </button>
-          <button type="button" onClick={handleExit} disabled={isLoading}>
-            Salir
-          </button>
-        </div>
-      </form>
+      <NumericKeypad
+        onNumberClick={handleNumberClick}
+        onClear={handleClear}
+        onAccept={handleSubmit}
+        onExit={handleExit}
+        showExitButton={true}
+        acceptButtonText={isLoading ? 'Validando...' : 'Aceptar'}
+      />
     </div>
   );
 };

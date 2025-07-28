@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { atmService } from '../services/atmService';
 import { CardInfoResponse, ValidationResult } from '../types/api';
+import NumericKeypad from '../components/NumericKeypad';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -20,17 +21,14 @@ const Home: React.FC = () => {
     return { isValid: true };
   }, []);
 
-  const handleCardNumberChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const value: string = e.target.value.replace(/\D/g, ''); // Solo números
-    if (value.length <= 16) {
-      setCardNumber(value);
+  const handleNumberClick = useCallback((number: number): void => {
+    if (cardNumber.length < 16) {
+      setCardNumber(prev => prev + number);
       setError('');
     }
-  }, []);
+  }, [cardNumber]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    
+  const handleSubmit = useCallback(async (): Promise<void> => {
     const validation: ValidationResult = validateCardNumber(cardNumber);
     if (!validation.isValid) {
       setError(validation.message || 'Error de validación');
@@ -40,19 +38,18 @@ const Home: React.FC = () => {
     setIsLoading(true);
     setError('');
 
-    // a mejorar
     try {
       const response = await atmService.validateCard(cardNumber);
       
       if (response.success && response.data) {
         const cardInfo: CardInfoResponse = response.data;
-        sessionStorage.setItem('cardInfo', JSON.stringify(cardInfo)); // utilizo sessionStorage para almacenar la informacion de la tarjeta? MMM.. a mejorar.                                                              // no se si es la mejor opcion, pero es la que se me ocurrio. 
+        sessionStorage.setItem('cardInfo', JSON.stringify(cardInfo));
         navigate('/pin');
       } else {
-        setError(response.message || 'Tarjeta no válida o bloqueada'); // a mejorar
+        setError(response.message || 'Tarjeta no válida o bloqueada');
       }
     } catch (error) {
-      setError('Error de conexión. Por favor intente nuevamente.'); // Si ingreso un numero de tarjeta invalido, a mejorar est mal 
+      setError('Error de conexión. Por favor intente nuevamente.');
     } finally {
       setIsLoading(false);
     }
@@ -68,32 +65,26 @@ const Home: React.FC = () => {
       <h1>ATM  Cajero Automático</h1>
       <p>Bienvenido al sistema de cajero automático</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label htmlFor="cardNumber">Número de Tarjeta</label>
-          <input
-            id="cardNumber"
-            type="text"
-            value={cardNumber}
-            onChange={handleCardNumberChange}
-            placeholder="Ingrese su número de tarjeta"
-            maxLength={16}
-            disabled={isLoading}
-          />
-          <small>Ingrese un número de tarjeta de 16 dígitos</small>
-        </div>
+      <div className="input-group">
+        <label>Número de Tarjeta</label>
+        <input
+          type="text"
+          value={cardNumber}
+          readOnly
+          placeholder="Ingrese su número de tarjeta"
+          className="card-display"
+        />
+        <small>Ingrese un número de tarjeta de 16 dígitos</small>
+      </div>
 
-        {error && <div className="error">{error}</div>}
+      {error && <div className="error">{error}</div>}
 
-        <div className="buttons">
-          <button type="button" onClick={handleClear} disabled={isLoading}>
-            Limpiar
-          </button>
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Validando...' : 'Aceptar'}
-          </button>
-        </div>
-      </form>
+      <NumericKeypad
+        onNumberClick={handleNumberClick}
+        onClear={handleClear}
+        onAccept={handleSubmit}
+        acceptButtonText={isLoading ? 'Validando...' : 'Aceptar'}
+      />
     </div>
   );
 };
